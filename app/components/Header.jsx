@@ -10,9 +10,20 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   const {shop, menu} = header;
   return (
     <header className="header">
-      <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
-        <strong>{shop.name}</strong>
-      </NavLink>
+      <div className="header-mobile-left">
+        <HeaderMenuMobileToggle />
+      </div>
+
+      <div className="header-logo">
+        <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
+        <img src="logo4.png"/>
+
+        </NavLink>
+        {/* <p className='logo-slogan' style={{fontSize: '0.8rem', marginTop: '-0.5rem'}}>
+          Fitness & more
+        </p> */}
+      </div>
+
       <HeaderMenu
         menu={menu}
         viewport="desktop"
@@ -88,7 +99,6 @@ export function HeaderMenu({
 function HeaderCtas({isLoggedIn, cart}) {
   return (
     <nav className="header-ctas" role="navigation">
-      <HeaderMenuMobileToggle />
       <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
         <Suspense fallback="Sign in">
           <Await resolve={isLoggedIn} errorElement="Sign in">
@@ -109,7 +119,20 @@ function HeaderMenuMobileToggle() {
       className="header-menu-mobile-toggle reset"
       onClick={() => open('mobile')}
     >
-      <h3>☰</h3>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="hamburger-icon"
+      >
+        <line x1="3" y1="12" x2="21" y2="12" />
+        <line x1="3" y1="6" x2="21" y2="6" />
+        <line x1="3" y1="18" x2="21" y2="18" />
+      </svg>
     </button>
   );
 }
@@ -117,8 +140,20 @@ function HeaderMenuMobileToggle() {
 function SearchToggle() {
   const {open} = useAside();
   return (
-    <button className="reset" onClick={() => open('search')}>
-      Search
+    <button className="search-toggle reset" onClick={() => open('search')}>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="search-icon"
+      >
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.35-4.35" />
+      </svg>
     </button>
   );
 }
@@ -143,8 +178,25 @@ function CartBadge({count}) {
           url: window.location.href || '',
         });
       }}
+      className="cart-badge"
     >
-      Cart {count === null ? <span>&nbsp;</span> : count}
+      <svg
+        className="cart-icon"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <circle cx="9" cy="21" r="1" />
+        <circle cx="20" cy="21" r="1" />
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+      </svg>
+      {count !== null && count > 0 && (
+        <span className="cart-badge-number">{count}</span>
+      )}
     </a>
   );
 }

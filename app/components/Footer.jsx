@@ -1,22 +1,49 @@
-import {Suspense} from 'react';
-import {Await, NavLink} from 'react-router';
+import { Suspense } from 'react';
+import { Await, NavLink } from 'react-router';
 
 /**
  * @param {FooterProps}
  */
-export function Footer({footer: footerPromise, header, publicStoreDomain}) {
+export function Footer({ footer: footerPromise, header, publicStoreDomain }) {
   return (
     <Suspense>
       <Await resolve={footerPromise}>
         {(footer) => (
           <footer className="footer">
-            {footer?.menu && header.shop.primaryDomain?.url && (
-              <FooterMenu
-                menu={footer.menu}
-                primaryDomainUrl={header.shop.primaryDomain.url}
-                publicStoreDomain={publicStoreDomain}
-              />
-            )}
+
+            <div className="footer-container">
+
+              {/* Brand section */}
+              <div className="footer-brand">
+                <h2>Caggy</h2>
+                <p>
+                  Premium fitness gear and footwear designed for performance,
+                  comfort and everyday athletes.
+                </p>
+              </div>
+
+              {/* Menu links */}
+              {footer?.menu && header.shop.primaryDomain?.url && (
+                <FooterMenu
+                  menu={footer.menu}
+                  primaryDomainUrl={header.shop.primaryDomain.url}
+                  publicStoreDomain={publicStoreDomain}
+                />
+              )}
+
+              {/* Contact */}
+              <div className="footer-contact">
+                <h4>Contact</h4>
+                <p>Email: support@caggy.com</p>
+                <p>Phone: +91 XXXXX XXXXX</p>
+              </div>
+
+            </div>
+
+            <div className="footer-bottom">
+              © {new Date().getFullYear()} Caggy. All rights reserved.
+            </div>
+
           </footer>
         )}
       </Await>
@@ -31,7 +58,7 @@ export function Footer({footer: footerPromise, header, publicStoreDomain}) {
  *   publicStoreDomain: string;
  * }}
  */
-function FooterMenu({menu, primaryDomainUrl, publicStoreDomain}) {
+function FooterMenu({ menu, primaryDomainUrl, publicStoreDomain }) {
   return (
     <nav className="footer-menu" role="navigation">
       {(menu || FALLBACK_FOOTER_MENU).items.map((item) => {
@@ -39,8 +66,8 @@ function FooterMenu({menu, primaryDomainUrl, publicStoreDomain}) {
         // if the url is internal, we strip the domain
         const url =
           item.url.includes('myshopify.com') ||
-          item.url.includes(publicStoreDomain) ||
-          item.url.includes(primaryDomainUrl)
+            item.url.includes(publicStoreDomain) ||
+            item.url.includes(primaryDomainUrl)
             ? new URL(item.url).pathname
             : item.url;
         const isExternal = !url.startsWith('/');
@@ -112,7 +139,7 @@ const FALLBACK_FOOTER_MENU = {
  *   isPending: boolean;
  * }}
  */
-function activeLinkStyle({isActive, isPending}) {
+function activeLinkStyle({ isActive, isPending }) {
   return {
     fontWeight: isActive ? 'bold' : undefined,
     color: isPending ? 'grey' : 'white',

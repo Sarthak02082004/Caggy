@@ -1,13 +1,21 @@
-import {Await, useLoaderData, Link} from 'react-router';
-import {Suspense} from 'react';
-import {Image} from '@shopify/hydrogen';
-import {ProductItem} from '~/components/ProductItem';
+import { Await, useLoaderData, Link } from 'react-router';
+import { Suspense, useMemo } from 'react';
+import { Image } from '@shopify/hydrogen';
+import { ProductItem } from '~/components/ProductItem';
+import { Swiper, SwiperSlide } from 'swiper/react';
+// import 'swiper/css/bundle';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import Carousel from './carousel';
+
+import { Autoplay, Navigation, Pagination } from 'swiper/modules';
 
 /**
  * @type {Route.MetaFunction}
  */
 export const meta = () => {
-  return [{title: 'Hydrogen | Home'}];
+  return [{ title: 'Hydrogen | Home' }];
 };
 
 /**
@@ -20,7 +28,7 @@ export async function loader(args) {
   // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
 
-  return {...deferredData, ...criticalData};
+  return { ...deferredData, ...criticalData };
 }
 
 /**
@@ -28,14 +36,14 @@ export async function loader(args) {
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  * @param {Route.LoaderArgs}
  */
-async function loadCriticalData({context}) {
-  const [{collections}] = await Promise.all([
+async function loadCriticalData({ context }) {
+  const [{ collections }] = await Promise.all([
     context.storefront.query(FEATURED_COLLECTION_QUERY),
     // Add other queries here, so that they are loaded in parallel
   ]);
 
   return {
-    featuredCollection: collections.nodes[0],
+    featuredCollection: collections.nodes,
   };
 }
 
@@ -45,7 +53,7 @@ async function loadCriticalData({context}) {
  * Make sure to not throw any errors here, as it will cause the page to 500.
  * @param {Route.LoaderArgs}
  */
-function loadDeferredData({context}) {
+function loadDeferredData({ context }) {
   const recommendedProducts = context.storefront
     .query(RECOMMENDED_PRODUCTS_QUERY)
     .catch((error) => {
@@ -62,11 +70,22 @@ function loadDeferredData({context}) {
 export default function Homepage() {
   /** @type {LoaderReturnData} */
   const data = useLoaderData();
+
+  const carousel = useMemo(() => (
+    <Carousel/>
+  ), []);
+
   return (
+
     <div className="home">
-      <FeaturedCollection collection={data.featuredCollection} />
+
+      {carousel}
       <RecommendedProducts products={data.recommendedProducts} />
+      {/* <FeaturedCollection collection={data.featuredCollection} /> */}
+      <FeaturedCollections collections={data.featuredCollection} />
+
     </div>
+
   );
 }
 
@@ -75,21 +94,57 @@ export default function Homepage() {
  *   collection: FeaturedCollectionFragment;
  * }}
  */
-function FeaturedCollection({collection}) {
-  if (!collection) return null;
-  const image = collection?.image;
+// function FeaturedCollection({ collection }) {
+//   if (!collection) return null;
+//   const image = collection?.image;
+//   return (
+//     <>
+//      <h2>Featured Collections</h2>
+//     <Link
+//       className="featured-collection"
+//       to={`/collections/${collection.handle}`}
+//     >
+//       {image && (
+//         <div className="featured-collection-image">
+//           <Image data={image} sizes="100vw" />
+//         </div>
+//       )}
+//       <h1>{collection.title}</h1>
+//     </Link>
+//     </>
+//   ); 
+// }
+
+function FeaturedCollections({ collections }) {
+
+  if (!collections || collections.length === 0) return null;
+
   return (
-    <Link
-      className="featured-collection"
-      to={`/collections/${collection.handle}`}
-    >
-      {image && (
-        <div className="featured-collection-image">
-          <Image data={image} sizes="100vw" />
-        </div>
-      )}
-      <h1>{collection.title}</h1>
-    </Link>
+    <>
+      <h2>Featured Collections</h2>
+
+      <div className="featured-collections-grid">
+        {collections.map((collection) => {
+          const image = collection?.image;
+
+          return (
+            <Link
+              key={collection.id}
+              className="featured-collection"
+              to={`/collections/${collection.handle}`}
+            >
+              {image && (
+                <div className="featured-collection-image">
+                  <Image data={image} sizes="100vw" />
+                </div>
+              )}
+
+              <h1>{collection.title}</h1>
+            </Link>
+          );
+        })}
+      </div>
+    </>
   );
 }
 
@@ -98,21 +153,26 @@ function FeaturedCollection({collection}) {
  *   products: Promise<RecommendedProductsQuery | null>;
  * }}
  */
-function RecommendedProducts({products}) {
+function RecommendedProducts({ products }) {
   return (
     <div className="recommended-products">
       <h2>Recommended Products</h2>
       <Suspense fallback={<div>Loading...</div>}>
         <Await resolve={products}>
-          {(response) => (
-            <div className="recommended-products-grid">
-              {response
-                ? response.products.nodes.map((product) => (
+          {(response) => {
+            // Add this console.log to see what you're getting
+            console.log('Product handles:', response?.products?.nodes?.map(p => p.handle));
+
+            return (
+              <div className="recommended-products-grid">
+                {response
+                  ? response.products.nodes.map((product) => (
                     <ProductItem key={product.id} product={product} />
                   ))
-                : null}
-            </div>
-          )}
+                  : null}
+              </div>
+            );
+          }}
         </Await>
       </Suspense>
       <br />
@@ -135,7 +195,7 @@ const FEATURED_COLLECTION_QUERY = `#graphql
   }
   query FeaturedCollection($country: CountryCode, $language: LanguageCode)
     @inContext(country: $country, language: $language) {
-    collections(first: 1, sortKey: UPDATED_AT, reverse: true) {
+    collections(first: 3, sortKey: TITLE, reverse: true) {
       nodes {
         ...FeaturedCollection
       }
@@ -164,7 +224,7 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
   }
   query RecommendedProducts ($country: CountryCode, $language: LanguageCode)
     @inContext(country: $country, language: $language) {
-    products(first: 4, sortKey: UPDATED_AT, reverse: true) {
+    products(first: 4, sortKey: PRICE, reverse: true) {
       nodes {
         ...RecommendedProduct
       }
