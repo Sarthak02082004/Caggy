@@ -1,14 +1,6 @@
 {
   "buildCommand": "npm run build",
-  "functions": {
-    "dist/server/index.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "dist/server/index.js"
-    }
-  ]
+  "devCommand": "npm run dev",
+  "framework": null,
+  "outputDirectory": "dist/worker"
 }
