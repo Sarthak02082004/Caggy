@@ -36,5 +36,10 @@ export default defineConfig({
   },
   server: {
     allowedHosts: ['.tryhydrogen.dev'],
+    allowedHosts: ['striking-alberta-promotion-started.trycloudflare.com'],
+    allowedHosts: ['galaxy-champagne-retro-coat.trycloudflare.com'],
+    allowedHosts:['costumes-tomatoes-concord-obviously.trycloudflare.com'],  
+
+
   },
 });

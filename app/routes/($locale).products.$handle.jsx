@@ -1,4 +1,4 @@
-import {useLoaderData} from 'react-router';
+import { useLoaderData } from 'react-router';
 import {
   getSelectedProductOptions,
   Analytics,
@@ -7,17 +7,18 @@ import {
   getAdjacentAndFirstAvailableVariants,
   useSelectedOptionInUrlParam,
 } from '@shopify/hydrogen';
-import {ProductPrice} from '~/components/ProductPrice';
-import {ProductImage} from '~/components/ProductImage';
-import {ProductForm} from '~/components/ProductForm';
-import {redirectIfHandleIsLocalized} from '~/lib/redirect';
+import { ProductPrice } from '~/components/ProductPrice';
+import { ProductImage } from '~/components/ProductImage';
+import { ProductGallery } from '~/components/ProductGallery';
+import { ProductForm } from '~/components/ProductForm';
+import { redirectIfHandleIsLocalized } from '~/lib/redirect';
 
 /**
  * @type {Route.MetaFunction}
  */
-export const meta = ({data}) => {
+export const meta = ({ data }) => {
   return [
-    {title: `Hydrogen | ${data?.product.title ?? ''}`},
+    { title: `Hydrogen | ${data?.product.title ?? ''}` },
     {
       rel: 'canonical',
       href: `/products/${data?.product.handle}`,
@@ -35,7 +36,7 @@ export async function loader(args) {
   // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
 
-  return {...deferredData, ...criticalData};
+  return { ...deferredData, ...criticalData };
 }
 
 /**
@@ -43,27 +44,27 @@ export async function loader(args) {
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  * @param {Route.LoaderArgs}
  */
-async function loadCriticalData({context, params, request}) {
-  const {handle} = params;
-  const {storefront} = context;
+async function loadCriticalData({ context, params, request }) {
+  const { handle } = params;
+  const { storefront } = context;
 
   if (!handle) {
     throw new Error('Expected product handle to be defined');
   }
 
-  const [{product}] = await Promise.all([
+  const [{ product }] = await Promise.all([
     storefront.query(PRODUCT_QUERY, {
-      variables: {handle, selectedOptions: getSelectedProductOptions(request)},
+      variables: { handle, selectedOptions: getSelectedProductOptions(request) },
     }),
     // Add other queries here, so that they are loaded in parallel
   ]);
 
   if (!product?.id) {
-    throw new Response(null, {status: 404});
+    throw new Response(null, { status: 404 });
   }
 
   // The API handle might be localized, so redirect to the localized handle
-  redirectIfHandleIsLocalized(request, {handle, data: product});
+  redirectIfHandleIsLocalized(request, { handle, data: product });
 
   return {
     product,
@@ -76,7 +77,7 @@ async function loadCriticalData({context, params, request}) {
  * Make sure to not throw any errors here, as it will cause the page to 500.
  * @param {Route.LoaderArgs}
  */
-function loadDeferredData({context, params}) {
+function loadDeferredData({ context, params }) {
   // Put any API calls that is not critical to be available on first page render
   // For example: product reviews, product recommendations, social feeds.
 
@@ -85,7 +86,7 @@ function loadDeferredData({context, params}) {
 
 export default function Product() {
   /** @type {LoaderReturnData} */
-  const {product} = useLoaderData();
+  const { product } = useLoaderData();
 
   // Optimistically selects a variant with given available variant information
   const selectedVariant = useOptimisticVariant(
@@ -103,11 +104,20 @@ export default function Product() {
     selectedOrFirstAvailableVariant: selectedVariant,
   });
 
-  const {title, descriptionHtml} = product;
+  const { title, descriptionHtml } = product;
+
+  const collection = product.collections?.nodes?.[0];
+
+  const similarProducts =
+    collection?.products.nodes.filter(
+      (item) => item.id !== product.id
+    ) || [];
 
   return (
     <div className="product">
-      <ProductImage image={selectedVariant?.image} />
+      {/* <ProductImage image={selectedVariant?.image} />
+       */}
+      <ProductGallery images={product.images.nodes} />
       <div className="product-main">
         <h1>{title}</h1>
         <ProductPrice
@@ -125,8 +135,33 @@ export default function Product() {
           <strong>Description</strong>
         </p>
         <br />
-        <div dangerouslySetInnerHTML={{__html: descriptionHtml}} />
+        <div dangerouslySetInnerHTML={{ __html: descriptionHtml }} />
         <br />
+        {/* SIMILAR PRODUCTS */}
+        <div className="similar-products">
+          <h2>Similar Products</h2>
+
+          <div className="similar-products-grid">
+            {similarProducts.slice(0, 2).map((item) => (
+              <a
+                key={item.id}
+                href={`/products/${item.handle}`}
+                className="similar-product-card"
+              >
+                <img
+                  src={item.images.nodes[0]?.url}
+                  alt={item.title}
+                />
+
+                <h4>{item.title}</h4>
+
+                <p>
+                  ₹{item.priceRange.minVariantPrice.amount}
+                </p>
+              </a>
+            ))}
+          </div>
+        </div>
       </div>
       <Analytics.ProductView
         data={{
@@ -194,6 +229,18 @@ const PRODUCT_FRAGMENT = `#graphql
     description
     encodedVariantExistence
     encodedVariantAvailability
+
+    # PRODUCT IMAGE GALLERY
+    images(first: 10) {
+      nodes {
+        id
+        url
+        altText
+        width
+        height
+      }
+    }
+
     options {
       name
       optionValues {
@@ -211,17 +258,51 @@ const PRODUCT_FRAGMENT = `#graphql
         }
       }
     }
-    selectedOrFirstAvailableVariant(selectedOptions: $selectedOptions, ignoreUnknownOptions: true, caseInsensitiveMatch: true) {
+
+    selectedOrFirstAvailableVariant(
+      selectedOptions: $selectedOptions
+      ignoreUnknownOptions: true
+      caseInsensitiveMatch: true
+    ) {
       ...ProductVariant
     }
-    adjacentVariants (selectedOptions: $selectedOptions) {
+
+    adjacentVariants(selectedOptions: $selectedOptions) {
       ...ProductVariant
     }
+
     seo {
       description
       title
     }
+
+    collections(first: 1) {
+  nodes {
+    id
+    title
+    products(first: 8) {
+      nodes {
+        id
+        title
+        handle
+        images(first: 1) {
+          nodes {
+            url
+            altText
+          }
+        }
+        priceRange {
+          minVariantPrice {
+            amount
+            currencyCode
+          }
+        }
+      }
+    }
   }
+}
+  }
+
   ${PRODUCT_VARIANT_FRAGMENT}
 `;
 
