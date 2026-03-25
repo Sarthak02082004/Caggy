@@ -3,7 +3,6 @@ import {isbot} from 'isbot';
 import {renderToReadableStream} from 'react-dom/server';
 import {createContentSecurityPolicy} from '@shopify/hydrogen';
 import {createContentSecurityPolicy} from '@shopify/hydrogen';
-
 createContentSecurityPolicy({
   connectSrc: [
     // (ie. 'wss://marin-subpedunculated-japingly.ngrok-free.dev:*')
