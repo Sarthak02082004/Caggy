@@ -1,6 +1,5 @@
 {
   "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "framework": null,
-  "outputDirectory": "dist/worker"
+  "outputDirectory": "dist/worker",
+  "framework": null
 }
