@@ -1,5 +1,21 @@
 {
+  "version": 2,
   "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "framework": null
+  "outputDirectory": "dist/server",
+  "framework": null,
+  "routes": [
+    {
+      "src": "/assets/(.*)",
+      "dest": "/dist/client/assets/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/dist/server/index.js"
+    }
+  ],
+  "functions": {
+    "dist/server/index.js": {
+      "runtime": "nodejs18.x"
+    }
+  }
 }
