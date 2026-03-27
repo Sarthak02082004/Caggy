@@ -153,7 +153,7 @@ export default function Product() {
                   alt={item.title}
                 />
 
-                <h4>{item.title}</h4>
+                <p style={{color:"black"}}>{item.title}</p>
 
                 <p>
                   ₹{item.priceRange.minVariantPrice.amount}

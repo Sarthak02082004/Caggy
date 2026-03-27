@@ -13,7 +13,6 @@ export const meta = () => {
  * @type {HeadersFunction}
  */
 export const headers = ({actionHeaders}) => actionHeaders;
-
 /**
  * @param {Route.ActionArgs}
  */

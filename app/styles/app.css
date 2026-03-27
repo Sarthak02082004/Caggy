@@ -334,14 +334,18 @@ button.secondary:hover {
     text-align: center;
     margin: 0 auto;
     margin-left: 60px;
+    
   }
+  
 }
 
 .header-logo img {
   height: 40px;
   width: 100%;
   object-fit: contain;
-
+  @media (max-width: 47.99em) {
+    border-radius: 50%;
+  }
 }
 
 .header-logo a {
@@ -350,6 +354,7 @@ button.secondary:hover {
   color: var(--color-dark);
   text-decoration: none;
   letter-spacing: -0.025em;
+
 }
 
 .header-menu-mobile-toggle {
@@ -566,14 +571,13 @@ button.secondary:hover {
   align-items: center;
   justify-content: center;
   padding: 0.5rem;
-  border-radius: var(--border-radius);
-  transition: var(--transition);
+  /* border-radius: var(--border-radius); */
+  /* transition: var(--transition); */
   color: var(--color-text);
 }
 
 .search-toggle:hover {
   color: var(--color-primary);
-  background-color: rgba(102, 126, 234, 0.1);
 }
 
 .search-icon {
@@ -1035,6 +1039,23 @@ button.secondary:hover {
   z-index: 2;
 }
 
+.recommended-products-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
+/* Default: Desktop (one line) */
+.recommended-products-title span {
+  display: inline;
+}
+
+/* Mobile: move "Products" to next line */
+@media (max-width: 768px) {
+  .recommended-products-title span {
+    display: block;
+  }
+}
+
 .recommended-products::before {
   content: "";
   position: absolute;
@@ -1175,9 +1196,9 @@ button.secondary:hover {
 /* mobile */
 @media (max-width:480px) {
   .recommended-products {
-    margin: 1rem;
-    margin-left: auto;
+    margin: 1rem auto;
     padding: 2rem 0;
+    max-width: calc(100% - 2rem);
   }
 
   .recommended-products-grid {
@@ -1461,6 +1482,12 @@ button.secondary:hover {
   position: relative;
   border: 1px solid rgba(255, 255, 255, 0.8);
 }
+
+/* @media (min-width:540px) {
+  .products-item h4{
+    font-weight: 100;
+  }
+} */
 
 .product-item::before {
   content: '';
@@ -1997,4 +2024,113 @@ button.secondary:hover {
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
+}
+
+/*
+ * =========================================================
+ * MOBILE FIXES v2 — appended to your existing app.css
+ * Approach: contain everything within viewport width
+ * so nothing overflows AND nothing gets cropped.
+ * =========================================================
+ */
+
+/*
+ * Fix 1: Constrain the root — no overflow-x:hidden so nothing
+ * gets cropped. Instead we just stop the page from growing wider
+ * than the viewport. Everything stays centered and fully visible.
+ */
+html,
+body {
+  max-width: 100%;
+  overflow-x: clip; /* 'clip' doesn't create a scroll container unlike 'hidden', so fixed/sticky positioning still works correctly */
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+/*
+ * Fix 2: Carousel — replace the negative-margin vw trick on mobile
+ * with a clean full-width block so it never bleeds past the viewport.
+ */
+@media (max-width: 768px) {
+  .homepage-carousel {
+    width: 100%;
+    position: relative;
+    left: 0;
+    right: 0;
+    margin-left: 0;
+    margin-right: 0;
+    overflow: hidden; /* clip the carousel images only, not the whole page */
+  }
+  .homepage-carousel img{
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+/*
+ * Fix 3: Prevent the page from jumping when the aside overlay opens
+ * (scrollbar disappearing causes ~15px layout shift).
+ * overflow-y:scroll keeps the scrollbar gutter reserved at all times.
+ */
+@media (max-width: 45em) {
+  html:has(.overlay.expanded) {
+    overflow-y: scroll;
+  }
+}
+
+/*
+ * Fix 4: Aside — cap width to viewport on small screens so the
+ * offscreen initial position doesn't add horizontal overflow.
+ */
+@media (max-width: 45em) {
+  aside {
+    max-width: 100vw;
+  }
+}
+
+/*
+ * Fix 5: Phantom overlay button zone — when aside = 100vw,
+ * close-outside width calc produces a negative/zero value,
+ * prevent it from adding any overflow.
+ */
+@media (max-width: 45em) {
+  .overlay .close-outside {
+    width: 0;
+  }
+}
+
+/*
+ * Fix 6: Any direct children of body or main containers
+ * that could be wider than the viewport — clamp them.
+ * This is the "center and contain" rule: max-width:100%
+ * ensures they shrink to fit rather than overflow.
+ */
+img,
+video,
+iframe,
+table {
+  max-width: 100%;
+}
+
+/*
+ * Fix 7: Grids that could push past viewport on mobile —
+ * ensure columns don't produce a wider-than-screen row.
+ */
+@media (max-width: 480px) {
+  .products-grid,
+  .collections-grid,
+  .featured-collections-grid,
+  .recommended-products-grid,
+  .similar-products-grid {
+    width: 100%;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    box-sizing: border-box;
+  }
 }

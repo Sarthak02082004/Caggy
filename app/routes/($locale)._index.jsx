@@ -73,7 +73,7 @@ export default function Homepage() {
   const data = useLoaderData();
 
   const carousel = useMemo(() => (
-    <Carousel/>
+    <Carousel />
   ), []);
 
   return (
@@ -157,7 +157,9 @@ function FeaturedCollections({ collections }) {
 function RecommendedProducts({ products }) {
   return (
     <div className="recommended-products">
-      <h2>Recommended Products</h2>
+      <h2 class="recommended-products-title">
+        Recommended <span>Products</span>
+      </h2>
       <Suspense fallback={<div>Loading...</div>}>
         <Await resolve={products}>
           {(response) => {

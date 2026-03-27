@@ -1,4 +1,4 @@
-import {Suspense} from 'react';
+import {Suspense, useState} from 'react';
 import {Await, NavLink, useAsyncValue} from 'react-router';
 import {useAnalytics, useOptimisticCart} from '@shopify/hydrogen';
 import {useAside} from '~/components/Aside';
@@ -68,6 +68,11 @@ export function HeaderMenu({
       {(menu || FALLBACK_HEADER_MENU).items.map((item) => {
         if (!item.url) return null;
 
+        // Skip "Home" items in mobile menu since we add it manually at the top
+        if (viewport === 'mobile' && (item.url === '/' || item.title.toLowerCase() === 'home')) {
+          return null;
+        }
+
         // if the url is internal, we strip the domain
         const url =
           item.url.includes('myshopify.com') ||
@@ -113,11 +118,22 @@ function HeaderCtas({isLoggedIn, cart}) {
 }
 
 function HeaderMenuMobileToggle() {
-  const {open} = useAside();
+  const {open, close} = useAside();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
+  const handleMenuToggle = () => {
+    if (isMenuOpen) {
+      close();
+    } else {
+      open('mobile');
+    }
+    setIsMenuOpen(!isMenuOpen);
+  };
+
   return (
     <button
       className="header-menu-mobile-toggle reset"
-      onClick={() => open('mobile')}
+      onClick={handleMenuToggle}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -138,9 +154,20 @@ function HeaderMenuMobileToggle() {
 }
 
 function SearchToggle() {
-  const {open} = useAside();
+  const {open, close} = useAside();
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  const handleSearchToggle = () => {
+    if (isSearchOpen) {
+      close();
+    } else {
+      open('search');
+    }
+    setIsSearchOpen(!isSearchOpen);
+  };
+
   return (
-    <button className="search-toggle reset" onClick={() => open('search')}>
+    <button className="search-toggle reset" onClick={handleSearchToggle}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
@@ -162,22 +189,30 @@ function SearchToggle() {
  * @param {{count: number | null}}
  */
 function CartBadge({count}) {
-  const {open} = useAside();
+  const {open, close} = useAside();
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const {publish, shop, cart, prevCart} = useAnalytics();
+
+  const handleCartToggle = (e) => {
+    e.preventDefault();
+    if (isCartOpen) {
+      close();
+    } else {
+      open('cart');
+      publish('cart_viewed', {
+        cart,
+        prevCart,
+        shop,
+        url: window.location.href || '',
+      });
+    }
+    setIsCartOpen(!isCartOpen);
+  };
 
   return (
     <a
       href="/cart"
-      onClick={(e) => {
-        e.preventDefault();
-        open('cart');
-        publish('cart_viewed', {
-          cart,
-          prevCart,
-          shop,
-          url: window.location.href || '',
-        });
-      }}
+      onClick={handleCartToggle}
       className="cart-badge"
     >
       <svg
