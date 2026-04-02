@@ -16,7 +16,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
 
       <div className="header-logo">
         <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
-        <img src="logo4.png"/>
+        <img src="/logo4.png"/>
 
         </NavLink>
         {/* <p className='logo-slogan' style={{fontSize: '0.8rem', marginTop: '-0.5rem'}}>

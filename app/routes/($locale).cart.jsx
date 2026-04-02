@@ -1,27 +1,28 @@
-import {useLoaderData, data} from 'react-router';
-import {CartForm} from '@shopify/hydrogen';
-import {CartMain} from '~/components/CartMain';
+import { useLoaderData, data } from 'react-router';
+import { CartForm } from '@shopify/hydrogen';
+import { CartMain } from '~/components/CartMain';
+import axios from 'axios';
 
 /**
  * @type {Route.MetaFunction}
  */
 export const meta = () => {
-  return [{title: `Hydrogen | Cart`}];
+  return [{ title: `Hydrogen | Cart` }];
 };
 
 /**
  * @type {HeadersFunction}
  */
-export const headers = ({actionHeaders}) => actionHeaders;
+export const headers = ({ actionHeaders }) => actionHeaders;
 /**
  * @param {Route.ActionArgs}
  */
-export async function action({request, context}) {
-  const {cart} = context;
+export async function action({ request, context }) {
+  const { cart } = context;
 
   const formData = await request.formData();
 
-  const {action, inputs} = CartForm.getFormInput(formData);
+  const { action, inputs } = CartForm.getFormInput(formData);
 
   if (!action) {
     throw new Error('No action provided');
@@ -31,8 +32,78 @@ export async function action({request, context}) {
   let result;
 
   switch (action) {
-    case CartForm.ACTIONS.LinesAdd:
-      result = await cart.addLines(inputs.lines);
+    // case CartForm.ACTIONS.LinesAdd: {
+    //   console.log("🔥 STEP 1: Inside LinesAdd");
+
+    //   // 1️⃣ Get current cart
+    //   const currentCart = await cart.get();
+    //   const existingLines = currentCart?.lines?.nodes || [];
+
+    //   // 2️⃣ Add new items
+    //   result = await cart.addLines(inputs.lines);
+
+    //   console.log("🔥 STEP 2: Cart updated");
+
+    //   // 3️⃣ Merge items (exclude free items)
+    //   const mergedItems = [
+    //     ...existingLines
+    //       .filter(line => !line.attributes?.some(attr => attr.key === "free"))
+    //       .map(line => ({
+    //         variantId: line.merchandise.id,
+    //         quantity: line.quantity,
+    //       })),
+    //     ...inputs.lines.map(line => ({
+    //       variantId: line.merchandiseId,
+    //       quantity: line.quantity || 0,
+    //     })),
+    //   ];
+
+    //   try {
+    //     console.log("🔥 STEP 3: Calling backend...");
+
+    //     const response = await axios.post(
+    //       'http://127.0.0.1:8080/api/cart/smart',
+    //       { items: mergedItems }
+    //     );
+
+    //     const smartData = response.data;
+
+    //     console.log("SMART RESPONSE:", smartData);
+
+    //     // 🔍 Check if free item already exists
+    //     const freeItemLine = existingLines.find(line =>
+    //       line.attributes?.some(attr => attr.key === "free")
+    //     );
+
+    //     // 🎁 ADD FREE ITEM (only if not exists)
+    //     if (smartData.offerApplied && smartData.freeItem && !freeItemLine) {
+    //       console.log("🎁 Adding free product...");
+
+    //       await cart.addLines([
+    //         {
+    //           // merchandiseId: smartData.freeItem.variantId,
+    //           merchandiseId: "gid://shopify/ProductVariant/48099460612335",
+    //           quantity: 1,
+    //           attributes: [{ key: "free", value: "true" }]
+    //         }
+    //       ]);
+    //     }
+
+    //     // ❌ REMOVE FREE ITEM (if offer not valid)
+    //     if (!smartData.offerApplied && freeItemLine) {
+    //       console.log("🗑 Removing free product...");
+
+    //       await cart.removeLines([freeItemLine.id]);
+    //     }
+
+    //   } catch (err) {
+    //     console.error("❌ SMART ERROR:", err);
+    //   }
+
+    //   break;
+    // }
+    case CartForm.ACTIONS.LinesAdd: 
+      result = await cart.addLines(inputs.lines); 
       break;
     case CartForm.ACTIONS.LinesUpdate:
       result = await cart.updateLines(inputs.lines);
@@ -77,7 +148,7 @@ export async function action({request, context}) {
 
   const cartId = result?.cart?.id;
   const headers = cartId ? cart.setCartId(result.cart.id) : new Headers();
-  const {cart: cartResult, errors, warnings} = result;
+  const { cart: cartResult, errors, warnings } = result;
 
   const redirectTo = formData.get('redirectTo') ?? null;
   if (typeof redirectTo === 'string') {
@@ -94,15 +165,15 @@ export async function action({request, context}) {
         cartId,
       },
     },
-    {status, headers},
+    { status, headers },
   );
 }
 
 /**
  * @param {Route.LoaderArgs}
  */
-export async function loader({context}) {
-  const {cart} = context;
+export async function loader({ context }) {
+  const { cart } = context;
   return await cart.get();
 }
 

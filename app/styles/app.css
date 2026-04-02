@@ -400,6 +400,7 @@ button.secondary:hover {
   position: relative;
   font-size: 0.95rem;
   letter-spacing: 0.025em;
+  
 }
 
 .header-menu-item::after {
@@ -411,16 +412,19 @@ button.secondary:hover {
   height: 2px;
   background: var(--color-primary);
   transition: var(--transition-fast);
+  
 }
 
 .header-menu-item:hover::after,
 .header-menu-item:focus::after {
   width: 100%;
+  
 }
 
 .header-menu-item:hover {
   color: var(--color-primary);
   transform: translateY(-1px);
+  text-decoration: none;
 }
 
 .header-ctas {
@@ -432,6 +436,18 @@ button.secondary:hover {
 
 .header-ctas>* {
   min-width: fit-content;
+}
+
+/* Laptop responsiveness */
+@media (min-width: 1024px) and (max-width: 1440px) {
+  .header {
+    padding: 0 1.5rem;
+  }
+
+  .header-menu-desktop {
+    gap: 2rem;
+    margin-left: 2rem;
+  }
 }
 
 /* HOME PAGE CAROUSEL */
@@ -577,13 +593,13 @@ button.secondary:hover {
 }
 
 .search-toggle:hover {
-  color: var(--color-primary);
+  /* color: var(--color-primary); */
 }
 
 .search-icon {
   width: 20px;
   height: 20px;
-  stroke: currentColor;
+  /* stroke: currentColor; */
   transition: var(--transition);
 }
 
@@ -769,7 +785,7 @@ button.secondary:hover {
   .footer-menu a {
     font-size: 1rem;
   }
-
+  
 }
 
 @media (max-width:400px) {
@@ -830,6 +846,7 @@ button.secondary:hover {
   border-top: 1px solid var(--color-dark);
   padding-top: 0.75rem;
   width: calc(var(--aside-width) - 40px);
+
 }
 
 .cart-line-quantity {

@@ -1,4 +1,4 @@
-import {CartForm} from '@shopify/hydrogen';
+import { CartForm } from '@shopify/hydrogen';
 
 /**
  * @param {{
@@ -16,8 +16,29 @@ export function AddToCartButton({
   lines,
   onClick,
 }) {
+
+  const handleClick = async () => {
+
+    // 👉 Call your smart cart backend
+    await fetch('http://localhost:8080/api/cart/smart', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        items: lines.map(line => ({
+          variantId: line.merchandiseId,
+          quantity: line.quantity
+        }))
+      })
+    });
+
+    // call original click if exists
+    if (onClick) onClick();
+  };
+
   return (
-    <CartForm route="/cart" inputs={{lines}} action={CartForm.ACTIONS.LinesAdd}>
+    <CartForm route="/cart" inputs={{ lines }} action={CartForm.ACTIONS.LinesAdd}>
       {(fetcher) => (
         <>
           <input
@@ -27,7 +48,7 @@ export function AddToCartButton({
           />
           <button
             type="submit"
-            onClick={onClick}
+            onClick={onClick} // optional
             disabled={disabled ?? fetcher.state !== 'idle'}
           >
             {children}

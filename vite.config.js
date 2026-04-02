@@ -39,6 +39,7 @@ export default defineConfig({
     // allowedHosts: ['striking-alberta-promotion-started.trycloudflare.com'],
     // allowedHosts: ['galaxy-champagne-retro-coat.trycloudflare.com'],
     // allowedHosts:['costumes-tomatoes-concord-obviously.trycloudflare.com'],
-    allowedHosts:['marin-subpedunculated-japingly.ngrok-free.dev'],
+    // allowedHosts:['marin-subpedunculated-japingly.ngrok-free.dev'],
+    allowedHosts:['qrhto-123-201-57-170.run.pinggy-free.link'],
     }, 
 });
